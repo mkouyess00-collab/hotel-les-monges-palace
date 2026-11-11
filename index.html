@@ -80,17 +80,17 @@
   </div>
 </section>
 
-<!-- ============ 2. HABITACIONES: escaparate y vista 3D ============ -->
+<!-- ============ 2. HABITACIONES: pared de azulejos y fotos ============ -->
 <section class="habitaciones" id="habitaciones" aria-labelledby="t-hab">
   <div class="hab-cabeza">
     <h2 id="t-hab" class="titulo-seccion" data-palabras>Ocho puertas, ocho habitaciones</h2>
-    <p class="hab-texto" data-sube>Cada puerta lleva su azulejo con dos monjas y su número. Elige una y entra: verás la habitación en 3D antes de reservar.</p>
+    <p class="hab-texto" data-sube>Cada puerta lleva su azulejo con dos monjas y su número. Elige una y entra a ver sus fotos antes de reservar.</p>
   </div>
   <div class="vitrina" id="vitrina" role="list"></div>
   <p class="hab-nota" data-sube>En todas: baño privado, aire acondicionado, televisor LED, wifi gratis, caja fuerte y secador. Cuna bajo petición. El precio depende de las fechas y se ve al reservar.</p>
 </section>
 
-<!-- Habitación: fotos reales y recorrido 3D -->
+<!-- Habitación: fotos reales -->
 <div class="visor" id="visor" role="dialog" aria-modal="true" aria-labelledby="visorNombre" hidden>
   <figure class="galeria" id="galeria">
     <img id="galFoto" src="img/hab-sup-1.jpg" width="1080" height="720" alt="">
@@ -98,17 +98,6 @@
   </figure>
   <button class="gal-flecha gal-ant" id="galAnt" type="button" aria-label="Foto anterior">←</button>
   <button class="gal-flecha gal-sig" id="galSig" type="button" aria-label="Foto siguiente">→</button>
-  <div class="sala" id="sala" hidden>
-    <canvas class="lienzo" id="lienzoSala" aria-label="Recorrido 3D de la habitación. Arrastra para mirar; usa las flechas, WASD o el mando para moverte."></canvas>
-    <div class="sala-modos" role="group" aria-label="Modo de vista">
-      <button type="button" id="modoMaqueta" aria-pressed="true">Maqueta</button>
-      <button type="button" id="modoCaminar" aria-pressed="false">Caminar dentro</button>
-    </div>
-    <p class="sala-ayuda" id="salaAyuda">Arrastra para girar la maqueta · rueda para acercarte</p>
-    <div class="mando" id="mando" aria-hidden="true"><i id="mandoBola"></i></div>
-    <p class="sala-nota">Recreación 3D orientativa a partir de las fotos de la habitación</p>
-    <button class="volver-fotos" id="volverFotos" type="button">Volver a las fotos</button>
-  </div>
   <div class="visor-info">
     <p class="visor-num" id="visorNum">301</p>
     <h3 class="visor-nombre" id="visorNombre">Habitación</h3>
@@ -117,8 +106,7 @@
     <ul class="visor-inc" id="visorInc"></ul>
     <div class="visor-fotos" id="visorFotos"></div>
     <div class="visor-botones">
-      <button class="boton-3d" id="abrirSala" type="button">Recorrer en 3D</button>
-      <a class="boton-luz" href="https://book.hoteliga.com/lesmonges" target="_blank" rel="noopener">Reservar</a>
+      <a class="boton-luz" href="https://book.hoteliga.com/lesmonges" target="_blank" rel="noopener">Reservar esta habitación</a>
     </div>
   </div>
   <button class="visor-cerrar" id="visorCerrar" type="button">Cerrar</button>

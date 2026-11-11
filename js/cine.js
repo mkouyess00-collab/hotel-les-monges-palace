@@ -140,8 +140,8 @@ if (window.top !== window.self) window.top.location = window.self.location;
   HAB.forEach((h, i) => {
     const b = document.createElement('button');
     b.type = 'button'; b.className = 'puerta-hab'; b.setAttribute('role', 'listitem');
-    b.setAttribute('aria-label', `Ver la habitación ${h.nombre} en 3D`);
-    b.innerHTML = `<span class="marco-foto"><img src="${fotoHab(h, 0)}" alt="" width="1080" height="720" loading="lazy"><img class="foto-b" src="${fotoHab(h, 1)}" alt="" width="1080" height="720" loading="lazy"><span class="brillo"></span><span class="pincel"></span><span class="azulejo">${h.num}</span><span class="entrar-hab">Entrar en 3D</span></span><span class="nombre-hab">${h.nombre}</span><span class="cap-hab">${h.cap}</span>`;
+    b.setAttribute('aria-label', `Ver las fotos de la habitación ${h.nombre}`);
+    b.innerHTML = `<span class="marco-foto"><img src="${fotoHab(h, 0)}" alt="" width="1080" height="720" loading="lazy"><img class="foto-b" src="${fotoHab(h, 1)}" alt="" width="1080" height="720" loading="lazy"><span class="brillo"></span><span class="pincel"></span><span class="azulejo">${h.num}</span><span class="entrar-hab">Ver fotos</span></span><span class="nombre-hab">${h.nombre}</span><span class="cap-hab">${h.cap}</span>`;
     b.addEventListener('click', () => abrirVisor(i, b));
     if (!tactil && G) {
       const m = $('.marco-foto', b);
@@ -156,9 +156,9 @@ if (window.top !== window.self) window.top.location = window.self.location;
     vitrina.appendChild(b);
   });
 
-  /* ventana de la habitación: fotos reales + recorrido 3D */
+  /* ventana de la habitación: fotos reales */
   const visor = $('#visor');
-  let visorAbierto = false, actual = 0, fotoAct = 0, origen = null, sala = null, salaMod = null;
+  let visorAbierto = false, actual = 0, fotoAct = 0, origen = null;
   const pintarVisor = () => {};
   function ponerFoto(k) {
     const h = HAB[actual]; fotoAct = (k + h.fotos) % h.fotos;
@@ -192,31 +192,7 @@ if (window.top !== window.self) window.top.location = window.self.location;
   $('#galeria').addEventListener('pointerdown', e => { toque = e.clientX; });
   $('#galeria').addEventListener('pointerup', e => { if (toque !== null && Math.abs(e.clientX - toque) > 50) ponerFoto(fotoAct + (e.clientX < toque ? 1 : -1)); toque = null; });
 
-  // recorrido 3D (se carga solo cuando se pide)
-  async function abrirSala() {
-    const cont = $('#sala'); cont.hidden = false; visor.classList.add('en-3d');
-    if (G && !reducir) gsap.fromTo(cont, { opacity: 0 }, { opacity: 1, duration: .6 });
-    try {
-      salaMod = salaMod || await import('./sala3d.js');
-      if (sala) sala.destruir();
-      sala = salaMod.crearSala($('#lienzoSala'), HAB[actual].id, m => {
-        $('#modoMaqueta').setAttribute('aria-pressed', m === 'maqueta'); $('#modoCaminar').setAttribute('aria-pressed', m === 'caminar');
-        $('#salaAyuda').textContent = m === 'maqueta' ? 'Arrastra para girar la maqueta · rueda para acercarte' : (tactil ? 'Mueve el mando para andar · arrastra para mirar' : 'Flechas o WASD para andar · arrastra para mirar');
-        $('#mando').hidden = m !== 'caminar' || !tactil;
-      });
-    } catch (e) { $('#salaAyuda').textContent = 'Tu navegador no puede mostrar el 3D. Puedes ver las fotos.'; }
-  }
-  function cerrarSala() { if (sala) { sala.destruir(); sala = null; } $('#sala').hidden = true; visor.classList.remove('en-3d'); }
-  $('#abrirSala').addEventListener('click', abrirSala);
-  $('#volverFotos').addEventListener('click', cerrarSala);
-  $('#modoMaqueta').addEventListener('click', () => sala && sala.modo('maqueta'));
-  $('#modoCaminar').addEventListener('click', () => sala && sala.modo('caminar'));
-  // mando táctil para andar
-  const mando = $('#mando'), bola = $('#mandoBola'); let mandoId = null;
-  const moverMando = e => { const r = mando.getBoundingClientRect(), cx = r.left + r.width / 2, cy = r.top + r.height / 2, R = r.width / 2; let x = (e.clientX - cx) / R, y = (e.clientY - cy) / R; const l = Math.hypot(x, y); if (l > 1) { x /= l; y /= l; } bola.style.transform = `translate(${x * R * .6}px,${y * R * .6}px)`; if (sala) { sala.joy.x = x; sala.joy.y = y; } };
-  mando.addEventListener('pointerdown', e => { mandoId = e.pointerId; mando.setPointerCapture(e.pointerId); moverMando(e); e.stopPropagation(); });
-  mando.addEventListener('pointermove', e => { if (e.pointerId === mandoId) moverMando(e); });
-  ['pointerup', 'pointercancel'].forEach(n => mando.addEventListener(n, () => { mandoId = null; bola.style.transform = ''; if (sala) { sala.joy.x = 0; sala.joy.y = 0; } }));
+  function cerrarSala() {}
 
   function abrirVisor(i, desde) {
     origen = desde; visor.hidden = false; visorAbierto = true; lenis && lenis.stop(); document.body.style.overflow = 'hidden';
@@ -240,8 +216,7 @@ if (window.top !== window.self) window.top.location = window.self.location;
   $('#visorSig').addEventListener('click', () => ponerHab(actual + 1));
   addEventListener('keydown', e => {
     if (!visorAbierto) return;
-    if (e.key === 'Escape') { if (sala) cerrarSala(); else cerrarVisor(); }
-    if (sala) return; // en 3D las flechas sirven para andar
+    if (e.key === 'Escape') cerrarVisor();
     if (e.key === 'ArrowRight') ponerFoto(fotoAct + 1);
     if (e.key === 'ArrowLeft') ponerFoto(fotoAct - 1);
   });
