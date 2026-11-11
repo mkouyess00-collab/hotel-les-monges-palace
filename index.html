@@ -90,9 +90,25 @@
   <p class="hab-nota" data-sube>En todas: baño privado, aire acondicionado, televisor LED, wifi gratis, caja fuerte y secador. Cuna bajo petición. El precio depende de las fechas y se ve al reservar.</p>
 </section>
 
-<!-- Vista 3D de una habitación -->
+<!-- Habitación: fotos reales y recorrido 3D -->
 <div class="visor" id="visor" role="dialog" aria-modal="true" aria-labelledby="visorNombre" hidden>
-  <canvas class="lienzo" id="lienzoVisor" aria-hidden="true"></canvas>
+  <figure class="galeria" id="galeria">
+    <img id="galFoto" src="img/hab-sup-1.jpg" width="1080" height="720" alt="">
+    <img id="galFoto2" src="img/hab-sup-1.jpg" width="1080" height="720" alt="" aria-hidden="true">
+  </figure>
+  <button class="gal-flecha gal-ant" id="galAnt" type="button" aria-label="Foto anterior">←</button>
+  <button class="gal-flecha gal-sig" id="galSig" type="button" aria-label="Foto siguiente">→</button>
+  <div class="sala" id="sala" hidden>
+    <canvas class="lienzo" id="lienzoSala" aria-label="Recorrido 3D de la habitación. Arrastra para mirar; usa las flechas, WASD o el mando para moverte."></canvas>
+    <div class="sala-modos" role="group" aria-label="Modo de vista">
+      <button type="button" id="modoMaqueta" aria-pressed="true">Maqueta</button>
+      <button type="button" id="modoCaminar" aria-pressed="false">Caminar dentro</button>
+    </div>
+    <p class="sala-ayuda" id="salaAyuda">Arrastra para girar la maqueta · rueda para acercarte</p>
+    <div class="mando" id="mando" aria-hidden="true"><i id="mandoBola"></i></div>
+    <p class="sala-nota">Recreación 3D orientativa a partir de las fotos de la habitación</p>
+    <button class="volver-fotos" id="volverFotos" type="button">Volver a las fotos</button>
+  </div>
   <div class="visor-info">
     <p class="visor-num" id="visorNum">301</p>
     <h3 class="visor-nombre" id="visorNombre">Habitación</h3>
@@ -100,9 +116,11 @@
     <p class="visor-desc" id="visorDesc"></p>
     <ul class="visor-inc" id="visorInc"></ul>
     <div class="visor-fotos" id="visorFotos"></div>
-    <a class="boton-luz" href="https://book.hoteliga.com/lesmonges" target="_blank" rel="noopener">Reservar esta habitación</a>
+    <div class="visor-botones">
+      <button class="boton-3d" id="abrirSala" type="button">Recorrer en 3D</button>
+      <a class="boton-luz" href="https://book.hoteliga.com/lesmonges" target="_blank" rel="noopener">Reservar</a>
+    </div>
   </div>
-  <p class="visor-ayuda" aria-hidden="true">Mueve el ratón o arrastra para mirar dentro</p>
   <button class="visor-cerrar" id="visorCerrar" type="button">Cerrar</button>
   <div class="visor-pasos">
     <button type="button" id="visorAnt" aria-label="Habitación anterior">←</button>
@@ -119,7 +137,6 @@
     <figure class="foto-capa fc-2" data-prof="2.2"><span class="foto-marco"><img src="img/fachada-balcones.jpg" width="1080" height="1080" alt="Balcones de forja y alero de cerámica original" loading="lazy"><span class="pincel"></span></span></figure>
     <figure class="foto-capa fc-3" data-prof="3.4"><span class="foto-marco"><img src="img/azulejo-102.jpg" width="1080" height="1080" alt="Azulejo azul con dos monjas y el número 102" loading="lazy"><span class="pincel"></span></span></figure>
     <figure class="foto-capa fc-4" data-prof="1.6"><span class="foto-marco"><img src="img/hab-junior-2.jpg" width="1080" height="720" alt="Ducha con azulejo de flores y bañera exenta bajo las vigas" loading="lazy"><span class="pincel"></span></span></figure>
-    <figure class="foto-capa fc-final"><span class="foto-marco"><img src="img/hab-sup-1.jpg" width="1080" height="720" alt="Habitación de la última planta bajo las vigas de madera" loading="lazy"><span class="pincel"></span></span></figure>
 
     <div class="capas-texto ct-1">
       <h2 id="t-historia" class="titulo-seccion">La casa de las monjas</h2>
@@ -168,7 +185,7 @@
     <figure class="t-centro"><img src="img/desayuno-2.jpg" width="1080" height="720" alt="Bizcochos y bollería en el buffet del desayuno" loading="lazy"></figure>
     <div class="tunel-texto">
       <h2 id="t-desayuno" class="titulo-medio">Desayuno buffet mediterráneo</h2>
-      <p>Bollería y bizcochos, embutidos y quesos, fruta fresca, zumos y platos calientes, servidos en el salón de piedra.</p>
+      <p>Bollería y bizcochos, embutidos y quesos, fruta fresca, zumos y platos calientes, servidos en el salón de piedra. <strong class="precio">11 € por persona</strong></p>
       <ul class="servicios">
         <li>Wifi gratis</li><li>Parking</li><li>Bicicletas de alquiler</li><li>Tour de tapas</li><li>Tour histórico</li><li>Información turística</li>
       </ul>

@@ -156,22 +156,20 @@ if (window.top !== window.self) window.top.location = window.self.location;
     vitrina.appendChild(b);
   });
 
-  /* visor 3D */
-  const visor = $('#visor'), lienzoV = $('#lienzoVisor');
-  let escV = null, capaV = null, visorAbierto = false, actual = 0, origen = null;
-  const arr = { on: false, x: 0, y: 0, vx: 0, vy: 0, ox: 0, oy: 0 };
-  function pintarVisor(t) {
-    if (!escV || !capaV) return;
-    if (!arr.on) { arr.ox *= .96; arr.oy *= .96; }
-    const auto = Math.sin(t * .00035) * .35;
-    capaV.push = .22 + Math.sin(t * .0005) * .04;
-    escV.pintar(clamp((tactil ? auto : mira.x * .9) + arr.ox, -1.6, 1.6), clamp((tactil ? 0 : mira.y * .6) + arr.oy, -1, 1), t * .001);
+  /* ventana de la habitación: fotos reales + recorrido 3D */
+  const visor = $('#visor');
+  let visorAbierto = false, actual = 0, fotoAct = 0, origen = null, sala = null, salaMod = null;
+  const pintarVisor = () => {};
+  function ponerFoto(k) {
+    const h = HAB[actual]; fotoAct = (k + h.fotos) % h.fotos;
+    const a = $('#galFoto'), b = $('#galFoto2'), src = fotoHab(h, fotoAct);
+    $$('#visorFotos button').forEach((x, j) => x.setAttribute('aria-pressed', j === fotoAct));
+    a.alt = `Habitación ${h.nombre}, foto ${fotoAct + 1} de ${h.fotos}`;
+    if (G && !reducir) { b.src = a.src; gsap.set(b, { opacity: 1 }); a.src = src; gsap.fromTo(a, { scale: 1.06 }, { scale: 1, duration: 1.2, ease: 'power3.out' }); gsap.to(b, { opacity: 0, duration: .6 }); }
+    else a.src = src;
   }
-  lienzoV.addEventListener('pointerdown', e => { arr.on = true; arr.x = e.clientX; arr.y = e.clientY; lienzoV.setPointerCapture(e.pointerId); });
-  lienzoV.addEventListener('pointermove', e => { if (!arr.on) return; arr.ox = clamp((e.clientX - arr.x) / innerWidth * -4, -1.4, 1.4); arr.oy = clamp((e.clientY - arr.y) / innerHeight * -2, -.8, .8); });
-  ['pointerup', 'pointercancel'].forEach(n => lienzoV.addEventListener(n, () => { arr.on = false; }));
-
-  async function ponerHab(i, foto = 0) {
+  function ponerHab(i) {
+    cerrarSala();
     actual = (i + HAB.length) % HAB.length; const h = HAB[actual];
     $('#visorNum').textContent = h.num; $('#visorNombre').textContent = 'Habitación ' + h.nombre;
     $('#visorCap').textContent = h.cap; $('#visorDesc').textContent = h.desc;
@@ -179,35 +177,58 @@ if (window.top !== window.self) window.top.location = window.self.location;
     const fotos = $('#visorFotos'); fotos.innerHTML = '';
     for (let k = 0; k < h.fotos; k++) {
       const b = document.createElement('button'); b.type = 'button';
-      b.setAttribute('aria-pressed', k === foto); b.setAttribute('aria-label', `Foto ${k + 1}`);
+      b.setAttribute('aria-label', `Ver foto ${k + 1}`);
       b.innerHTML = `<img src="${fotoHab(h, k)}" alt="" width="1080" height="720">`;
-      b.addEventListener('click', () => verFoto(k));
+      b.addEventListener('click', () => ponerFoto(k));
       fotos.appendChild(b);
     }
     if (G && !reducir) gsap.fromTo('.visor-info > *', { y: 24, opacity: 0 }, { y: 0, opacity: 1, stagger: .05, duration: .7, ease: 'power3.out' });
-    await verFoto(foto);
+    ponerFoto(0);
   }
-  async function verFoto(k) {
-    const h = HAB[actual];
-    $$('#visorFotos button').forEach((b, j) => b.setAttribute('aria-pressed', j === k));
-    if (!escV) return;
-    const nueva = fotoHab(h, k), prof = P(`hab-${h.id}-${k + 1}`);
-    if (G && !reducir && capaV) await gsap.to(capaV, { oscuro: 1, duration: .25 });
-    if (!capaV) capaV = await escV.capa({ foto: nueva, prof, centro: [.5, .5], fuerza: .07 });
-    else await escV.cambiar(capaV, nueva, prof);
-    if (G && !reducir) gsap.fromTo(capaV, { oscuro: 1 }, { oscuro: 0, duration: .6 }); else capaV.oscuro = 0;
+  $('#galAnt').addEventListener('click', () => ponerFoto(fotoAct - 1));
+  $('#galSig').addEventListener('click', () => ponerFoto(fotoAct + 1));
+  // deslizar con el dedo entre fotos
+  let toque = null;
+  $('#galeria').addEventListener('pointerdown', e => { toque = e.clientX; });
+  $('#galeria').addEventListener('pointerup', e => { if (toque !== null && Math.abs(e.clientX - toque) > 50) ponerFoto(fotoAct + (e.clientX < toque ? 1 : -1)); toque = null; });
+
+  // recorrido 3D (se carga solo cuando se pide)
+  async function abrirSala() {
+    const cont = $('#sala'); cont.hidden = false; visor.classList.add('en-3d');
+    if (G && !reducir) gsap.fromTo(cont, { opacity: 0 }, { opacity: 1, duration: .6 });
+    try {
+      salaMod = salaMod || await import('./sala3d.js');
+      if (sala) sala.destruir();
+      sala = salaMod.crearSala($('#lienzoSala'), HAB[actual].id, m => {
+        $('#modoMaqueta').setAttribute('aria-pressed', m === 'maqueta'); $('#modoCaminar').setAttribute('aria-pressed', m === 'caminar');
+        $('#salaAyuda').textContent = m === 'maqueta' ? 'Arrastra para girar la maqueta · rueda para acercarte' : (tactil ? 'Mueve el mando para andar · arrastra para mirar' : 'Flechas o WASD para andar · arrastra para mirar');
+        $('#mando').hidden = m !== 'caminar' || !tactil;
+      });
+    } catch (e) { $('#salaAyuda').textContent = 'Tu navegador no puede mostrar el 3D. Puedes ver las fotos.'; }
   }
-  async function abrirVisor(i, desde) {
+  function cerrarSala() { if (sala) { sala.destruir(); sala = null; } $('#sala').hidden = true; visor.classList.remove('en-3d'); }
+  $('#abrirSala').addEventListener('click', abrirSala);
+  $('#volverFotos').addEventListener('click', cerrarSala);
+  $('#modoMaqueta').addEventListener('click', () => sala && sala.modo('maqueta'));
+  $('#modoCaminar').addEventListener('click', () => sala && sala.modo('caminar'));
+  // mando táctil para andar
+  const mando = $('#mando'), bola = $('#mandoBola'); let mandoId = null;
+  const moverMando = e => { const r = mando.getBoundingClientRect(), cx = r.left + r.width / 2, cy = r.top + r.height / 2, R = r.width / 2; let x = (e.clientX - cx) / R, y = (e.clientY - cy) / R; const l = Math.hypot(x, y); if (l > 1) { x /= l; y /= l; } bola.style.transform = `translate(${x * R * .6}px,${y * R * .6}px)`; if (sala) { sala.joy.x = x; sala.joy.y = y; } };
+  mando.addEventListener('pointerdown', e => { mandoId = e.pointerId; mando.setPointerCapture(e.pointerId); moverMando(e); e.stopPropagation(); });
+  mando.addEventListener('pointermove', e => { if (e.pointerId === mandoId) moverMando(e); });
+  ['pointerup', 'pointercancel'].forEach(n => mando.addEventListener(n, () => { mandoId = null; bola.style.transform = ''; if (sala) { sala.joy.x = 0; sala.joy.y = 0; } }));
+
+  function abrirVisor(i, desde) {
     origen = desde; visor.hidden = false; visorAbierto = true; lenis && lenis.stop(); document.body.style.overflow = 'hidden';
-    if (!escV) { try { escV = new Escena3D(lienzoV); } catch { visor.classList.add('sin-gl'); } }
     if (G && !reducir && desde) {
       const r = $('.marco-foto', desde).getBoundingClientRect();
       gsap.fromTo(visor, { clipPath: `inset(${r.top}px ${innerWidth - r.right}px ${innerHeight - r.bottom}px ${r.left}px round 2px)` }, { clipPath: 'inset(0px 0px 0px 0px round 0px)', duration: 1.1, ease: 'expo.inOut' });
     }
-    await ponerHab(i);
+    ponerHab(i);
     $('#visorCerrar').focus();
   }
   function cerrarVisor() {
+    cerrarSala();
     const fin = () => { visor.hidden = true; visorAbierto = false; lenis && lenis.start(); document.body.style.overflow = ''; origen && origen.focus(); };
     if (G && !reducir && origen) {
       const r = $('.marco-foto', origen).getBoundingClientRect();
@@ -219,9 +240,10 @@ if (window.top !== window.self) window.top.location = window.self.location;
   $('#visorSig').addEventListener('click', () => ponerHab(actual + 1));
   addEventListener('keydown', e => {
     if (!visorAbierto) return;
-    if (e.key === 'Escape') cerrarVisor();
-    if (e.key === 'ArrowRight') ponerHab(actual + 1);
-    if (e.key === 'ArrowLeft') ponerHab(actual - 1);
+    if (e.key === 'Escape') { if (sala) cerrarSala(); else cerrarVisor(); }
+    if (sala) return; // en 3D las flechas sirven para andar
+    if (e.key === 'ArrowRight') ponerFoto(fotoAct + 1);
+    if (e.key === 'ArrowLeft') ponerFoto(fotoAct - 1);
   });
 
   /* ---------- Textos: palabra a palabra y subidas ---------- */
@@ -245,24 +267,18 @@ if (window.top !== window.self) window.top.location = window.self.location;
     // HISTORIA: fotos en capas a distinta profundidad; la cámara las atraviesa
     // y al final el salón se abre hasta llenar la pantalla
     const capasFotos = $$('.foto-capa[data-prof]');
-    gsap.set('.fc-final', { left: 0, top: 0, width: '100%', height: '100%', xPercent: 0, yPercent: 0, x: 0, y: 0, clipPath: 'inset(30% 33% 30% 33%)', opacity: 0 });
-    const th = gsap.timeline({ defaults: { ease: 'none' }, scrollTrigger: { trigger: '#historia', start: 'top top', end: '+=360%', pin: true, scrub: 1 } });
+    const th = gsap.timeline({ defaults: { ease: 'none' }, scrollTrigger: { trigger: '#historia', start: 'top top', end: '+=300%', pin: true, scrub: 1 } });
     th.fromTo('.capas-fondo', { xPercent: 5 }, { xPercent: -55, duration: 1 }, 0);
     capasFotos.forEach(f => {
       const d = +f.dataset.prof;
-      th.fromTo(f, { y: () => innerHeight * .28 * d, scale: .9 + d * .02, rotateX: 8 }, { y: () => -innerHeight * .34 * d, scale: 1 + d * .05, rotateX: -6, duration: .85 }, 0);
-      th.fromTo($('img', f), { yPercent: -9 }, { yPercent: 9, duration: .85 }, 0);
-      th.to(f, { opacity: 0, duration: .12 }, .72);
+      th.fromTo(f, { y: () => innerHeight * .28 * d, scale: .9 + d * .02, rotateX: 8 }, { y: () => -innerHeight * .26 * d, scale: 1 + d * .05, rotateX: -6, duration: 1 }, 0);
+      th.fromTo($('img', f), { yPercent: -9 }, { yPercent: 9, duration: 1 }, 0);
     });
     const textoCapa = (sel, a, b) => {
       th.fromTo(sel, { autoAlpha: 0, y: 40, filter: 'blur(10px)' }, { autoAlpha: 1, y: 0, filter: 'blur(0px)', duration: .07 }, a);
       th.to(sel, { autoAlpha: 0, y: -30, filter: 'blur(8px)', duration: .06 }, b);
     };
-    textoCapa('.ct-1', 0, .26); textoCapa('.ct-2', .3, .52); textoCapa('.ct-3', .56, .78);
-    th.to('.fc-final', { opacity: 1, duration: .06 }, .7)
-      .to('.fc-final', { clipPath: 'inset(0% 0% 0% 0%)', duration: .24 }, .74)
-      .fromTo('.fc-final img', { scale: 1.35 }, { scale: 1.05, duration: .3 }, .7)
-      .to('.capas-fondo', { opacity: 0, duration: .1 }, .78);
+    textoCapa('.ct-1', 0, .26); textoCapa('.ct-2', .3, .52); th.fromTo('.ct-3', { autoAlpha: 0, y: 40, filter: 'blur(10px)' }, { autoAlpha: 1, y: 0, filter: 'blur(0px)', duration: .07 }, .56);
     if (!tactil) {
       const marcos = $$('.foto-capa[data-prof] .foto-marco').map(m => ({ m, d: +m.parentNode.dataset.prof, x: gsap.quickTo(m, 'x', { duration: .9, ease: 'power3' }), y: gsap.quickTo(m, 'y', { duration: .9, ease: 'power3' }), r: gsap.quickTo(m, 'rotateY', { duration: .9, ease: 'power3' }) }));
       $('#capas').addEventListener('mousemove', e => {
@@ -302,12 +318,12 @@ if (window.top !== window.self) window.top.location = window.self.location;
     const paso = () => { hecho++; const v = Math.round(hecho / total * 100); num.textContent = v; barra.style.transform = `scaleX(${hecho / total})`; };
     try {
       escE = new Escena3D(lienzoE);
-      salon = await escE.capa({ foto: 'img/salon-1.jpg', prof: P('salon-1'), centro: [.78, .52], fuerza: .05 }); salon.alfa = 0; paso();
-      fachada = await escE.capa({ foto: 'img/fachada.jpg', prof: P('fachada'), centro: PUERTA, fuerza: .045, foco: FOCO });
+      salon = await escE.capa({ foto: 'img/salon-1.jpg', prof: P('salon-1'), centro: [.78, .52], fuerza: .018 }); salon.alfa = 0; paso();
+      fachada = await escE.capa({ foto: 'img/fachada.jpg', prof: P('fachada'), centro: PUERTA, fuerza: .016, foco: FOCO });
       escE.capas.reverse(); paso();
     } catch { $('.escenario', entrada).classList.add('sin-gl'); paso(); paso(); }
     await Promise.all(escenas.map(async s => {
-      try { s.esc = new Escena3D(s.lienzo); s.capa = await s.esc.capa({ foto: `img/${s.foto}.jpg`, prof: P(s.foto), centro: s.centro, fuerza: .05 }); }
+      try { s.esc = new Escena3D(s.lienzo); s.capa = await s.esc.capa({ foto: `img/${s.foto}.jpg`, prof: P(s.foto), centro: s.centro, fuerza: .016 }); }
       catch { $('.escenario', s.sec).classList.add('sin-gl'); }
       paso();
     }));
