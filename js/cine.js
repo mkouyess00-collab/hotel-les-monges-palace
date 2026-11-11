@@ -1,0 +1,329 @@
+/* Les Monges Palace — dirección de movimiento cinematográfica */
+// Protección anti-marcos: nadie puede meter esta web dentro de otra
+if (window.top !== window.self) window.top.location = window.self.location;
+(() => {
+  const $ = (s, c = document) => c.querySelector(s);
+  const $$ = (s, c = document) => [...c.querySelectorAll(s)];
+  const reducir = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const tactil = matchMedia('(pointer: coarse)').matches;
+  const G = typeof gsap !== 'undefined';
+  const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
+  const tramo = (p, a, b) => clamp((p - a) / (b - a));
+  const suave = t => t * t * (3 - 2 * t);
+  const entraSale = t => t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+  const P = n => `img/prof/${n}-prof.jpg`;
+
+  /* ---------- Mirada: el ratón mueve la cámara (como girar la cabeza) ---------- */
+  const mira = { x: 0, y: 0, tx: 0, ty: 0 };
+  addEventListener('pointermove', e => {
+    if (e.pointerType === 'touch') return;
+    mira.tx = (e.clientX / innerWidth - .5) * 2; mira.ty = (e.clientY / innerHeight - .5) * 2;
+  }, { passive: true });
+
+  /* ---------- Desplazamiento suave ---------- */
+  let lenis = null;
+  if (G) gsap.registerPlugin(ScrollTrigger);
+  if (typeof Lenis !== 'undefined' && !reducir) {
+    lenis = new Lenis({ lerp: .085, smoothWheel: true, wheelMultiplier: .9 });
+    if (G) { lenis.on('scroll', ScrollTrigger.update); gsap.ticker.add(t => lenis.raf(t * 1000)); gsap.ticker.lagSmoothing(0); }
+  }
+  const irA = (dest, op = {}) => lenis ? lenis.scrollTo(dest, op) : (typeof dest === 'number' ? scrollTo({ top: dest, behavior: 'smooth' }) : $(dest)?.scrollIntoView({ behavior: 'smooth' }));
+  $$('a[href^="#"]').forEach(a => a.addEventListener('click', e => {
+    const h = a.getAttribute('href'); if (h.length < 2 || !$(h)) return;
+    e.preventDefault(); cerrarCortina(); irA(h, { duration: 1.6 });
+  }));
+
+  /* ---------- Cabecera y menú móvil ---------- */
+  const cab = $('#cabecera'); let ultimaY = 0;
+  const alScroll = y => { cab.classList.toggle('esconde', y > ultimaY && y > 200 && $('#cortina').hidden); ultimaY = y; };
+  lenis ? lenis.on('scroll', ({ scroll }) => alScroll(scroll)) : addEventListener('scroll', () => alScroll(scrollY), { passive: true });
+  const navBtn = $('#navMovil'), cortina = $('#cortina');
+  function cerrarCortina() { cortina.hidden = true; navBtn.setAttribute('aria-expanded', 'false'); navBtn.textContent = 'Menú'; }
+  navBtn.addEventListener('click', () => {
+    const abre = cortina.hidden; cortina.hidden = !abre; navBtn.setAttribute('aria-expanded', abre); navBtn.textContent = abre ? 'Cerrar' : 'Menú';
+    if (abre && G) gsap.from('#cortina a', { yPercent: 60, opacity: 0, stagger: .05, duration: .7, ease: 'power3.out' });
+  });
+
+  /* ---------- Capítulos: aparecen y se van según el avance ---------- */
+  function pintarCapitulos(esc, p) {
+    $$('.capitulo', esc).forEach(c => {
+      const de = +c.dataset.de, a = +c.dataset.a, f = .045;
+      const o = Math.min(de <= 0 ? 1 : tramo(p, de, de + f), a >= 1 ? 1 : 1 - tramo(p, a - f, a));
+      const op = clamp(o);
+      c.style.opacity = op; c.style.visibility = op > 0 ? 'visible' : 'hidden';
+      c.style.transform = `translateY(${(1 - op) * 30}px)`;
+      c.style.filter = op < 1 ? `blur(${(1 - op) * 8}px)` : 'none';
+    });
+  }
+
+  /* ---------- 1. LA ENTRADA ---------- */
+  const entrada = $('#entrada'), lienzoE = $('#lienzoEntrada'), timbre = $('#timbre');
+  const PUERTA = [.309, .80], FOCO = innerWidth < innerHeight ? [.4, .62] : [.31, .9];
+  let escE = null, fachada = null, salon = null, pE = 0, entradaVisible = true;
+  function progresoDe(sec) {
+    const r = sec.getBoundingClientRect(), rec = r.height - innerHeight;
+    return rec > 0 ? clamp(-r.top / rec) : 0;
+  }
+  function puntoEnPantalla(img, uv) {
+    const W = innerWidth, H = innerHeight, rs = W / H, ri = img[0] / img[1];
+    const s = rs > ri ? [1, ri / rs] : [rs / ri, 1];
+    const f = [0, 1].map(k => clamp(FOCO[k], s[k] / 2, 1 - s[k] / 2));
+    return [((uv[0] - f[0]) / s[0] + .5) * W, ((uv[1] - f[1]) / s[1] + .5) * H];
+  }
+  function pintarEntrada(t) {
+    const p = pE;
+    if (escE && fachada) {
+      const a = entraSale(tramo(p, 0, .5));
+      fachada.push = a * 3.4;
+      fachada.luz = suave(tramo(p, .28, .5)) * .95;
+      fachada.alfa = 1 - suave(tramo(p, .45, .54));
+      salon.alfa = suave(tramo(p, .45, .54));
+      salon.push = .1 + entraSale(tramo(p, .45, 1)) * 1.35;
+      salon.luz = (1 - suave(tramo(p, .47, .66))) * .8;
+      salon.oscuro = suave(tramo(p, .9, 1)) * .55;
+      const sx = tactil ? Math.sin(t * .0004) * .6 : mira.x, sy = tactil ? Math.cos(t * .0003) * .3 : mira.y;
+      escE.pintar(sx, sy, t * .001);
+    }
+    // botón sobre la puerta
+    const [x, y] = puntoEnPantalla(fachada ? fachada.tam : [1080, 978], PUERTA);
+    timbre.style.left = x + 'px'; timbre.style.top = y + 'px';
+    const vt = 1 - tramo(p, .02, .07);
+    timbre.style.opacity = vt; timbre.style.pointerEvents = vt > .5 ? 'auto' : 'none';
+    $('#pista').style.opacity = 1 - tramo(p, 0, .04);
+    $('#reglaBarra').style.transform = `scaleY(${p})`;
+    pintarCapitulos(entrada, p);
+  }
+  timbre.addEventListener('click', () => {
+    const fin = entrada.offsetTop + (entrada.offsetHeight - innerHeight) * .9;
+    irA(fin, { duration: 6.5, easing: t => entraSale(t) });
+  });
+
+  /* ---------- 4 y 6. Escenas de foto en 3D (azotea, Alicante) ---------- */
+  const escenas = $$('.escena-foto').map(sec => ({ sec, lienzo: $('canvas', sec), foto: sec.dataset.foto, centro: sec.dataset.centro.split(',').map(Number), esc: null, capa: null, p: 0, visible: false }));
+
+  /* ---------- Bucle de dibujo (solo lo que se ve) ---------- */
+  const vis = new IntersectionObserver(es => es.forEach(e => {
+    if (e.target === entrada) entradaVisible = e.isIntersecting;
+    const s = escenas.find(x => x.sec === e.target); if (s) s.visible = e.isIntersecting;
+  }));
+  vis.observe(entrada); escenas.forEach(s => vis.observe(s.sec));
+  function bucle(t) {
+    mira.x += (mira.tx - mira.x) * .06; mira.y += (mira.ty - mira.y) * .06;
+    if (entradaVisible) { pE = progresoDe(entrada); pintarEntrada(t); }
+    escenas.forEach(s => {
+      if (!s.visible) return;
+      s.p = progresoDe(s.sec);
+      if (s.esc && s.capa) {
+        s.capa.push = .05 + entraSale(s.p) * 1.1;
+        s.capa.oscuro = .1 + suave(tramo(s.p, .55, 1)) * .25;
+        s.esc.pintar(tactil ? Math.sin(t * .0004) * .6 : mira.x, tactil ? 0 : mira.y, t * .001);
+      }
+      pintarCapitulos(s.sec, s.p);
+    });
+    if (visorAbierto) pintarVisor(t);
+    requestAnimationFrame(bucle);
+  }
+
+  /* ---------- 2. HABITACIONES (fotos reales; número = su azulejo) ---------- */
+  const HAB = [
+    { id: 'sup', num: 301, nombre: 'Doble SUP', cap: 'Para 2 personas', desc: 'Más amplia que la standard y con más detalles de la casa. Algunas, en la última planta, conservan las vigas de madera.', inc: ['Cama doble', 'Más espacio', 'Baño privado', 'Caja fuerte'], fotos: 4 },
+    { id: 'junior', num: 300, nombre: 'Junior', cap: 'Para 2 personas', desc: 'En lo alto de la casa, bajo las vigas: ducha abierta con azulejo de flores y bañera exenta dentro de la habitación.', inc: ['Bañera exenta', 'Ducha abierta', 'Vigas de madera'], fotos: 3 },
+    { id: 'hidro', num: 101, nombre: 'Doble deluxe hidro', cap: 'Para 2 personas', desc: 'Para una escapada en pareja: la doble deluxe con bañera de hidromasaje.', inc: ['Hidromasaje', 'Cama doble', 'Secador'], fotos: 4 },
+    { id: 'familiar', num: 302, nombre: 'Familiar', cap: 'Para familias', desc: 'La habitación grande de la última planta, con vigas de madera, zona de estar y baño privado.', inc: ['Zona de estar', 'Vigas de madera', 'Cuna bajo petición'], fotos: 4 },
+    { id: 'standard', num: 111, nombre: 'Doble standard', cap: 'Para 2 personas', desc: 'La doble de la casa: cómoda, luminosa y con baño privado.', inc: ['Cama doble', 'Baño privado', 'Wifi gratis'], fotos: 4 },
+    { id: 'triple', num: 100, nombre: 'Triple', cap: 'Para 3 personas', desc: 'Tres camas y sitio para las maletas de todos. Para amigos o familias pequeñas.', inc: ['Tres camas', 'Baño privado', 'Cuna bajo petición'], fotos: 4 },
+    { id: 'dui', num: 204, nombre: 'DUI', cap: 'Doble de uso individual', desc: 'Una doble para una sola persona: más espacio y cama grande.', inc: ['Cama de matrimonio', 'Baño privado', 'Caja fuerte'], fotos: 4 },
+    { id: 'individual', num: 109, nombre: 'Individual', cap: 'Para 1 persona', desc: 'Pensada para viajar solo: cama individual, escritorio y baño privado con ducha.', inc: ['Cama individual', 'Ducha', 'Escritorio'], fotos: 4 },
+  ];
+  const fotoHab = (h, i) => `img/hab-${h.id}-${i + 1}.jpg`;
+  const vitrina = $('#vitrina');
+  HAB.forEach((h, i) => {
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'puerta-hab'; b.setAttribute('role', 'listitem');
+    b.setAttribute('aria-label', `Ver la habitación ${h.nombre} en 3D`);
+    b.innerHTML = `<span class="marco-foto"><img src="${fotoHab(h, 0)}" alt="" width="1080" height="720" loading="lazy"><img class="foto-b" src="${fotoHab(h, 1)}" alt="" width="1080" height="720" loading="lazy"><span class="brillo"></span><span class="pincel"></span><span class="azulejo">${h.num}</span><span class="entrar-hab">Entrar en 3D</span></span><span class="nombre-hab">${h.nombre}</span><span class="cap-hab">${h.cap}</span>`;
+    b.addEventListener('click', () => abrirVisor(i, b));
+    if (!tactil && G) {
+      const m = $('.marco-foto', b);
+      const rx = gsap.quickTo(m, 'rotateX', { duration: .6, ease: 'power3' }), ry = gsap.quickTo(m, 'rotateY', { duration: .6, ease: 'power3' });
+      b.addEventListener('pointermove', e => {
+        const r = m.getBoundingClientRect(), nx = (e.clientX - r.left) / r.width, ny = (e.clientY - r.top) / r.height;
+        rx((.5 - ny) * 14); ry((nx - .5) * 16);
+        m.style.setProperty('--x', nx * 100 + '%'); m.style.setProperty('--y', ny * 100 + '%');
+      });
+      b.addEventListener('pointerleave', () => { rx(0); ry(0); });
+    }
+    vitrina.appendChild(b);
+  });
+
+  /* visor 3D */
+  const visor = $('#visor'), lienzoV = $('#lienzoVisor');
+  let escV = null, capaV = null, visorAbierto = false, actual = 0, origen = null;
+  const arr = { on: false, x: 0, y: 0, vx: 0, vy: 0, ox: 0, oy: 0 };
+  function pintarVisor(t) {
+    if (!escV || !capaV) return;
+    if (!arr.on) { arr.ox *= .96; arr.oy *= .96; }
+    const auto = Math.sin(t * .00035) * .35;
+    capaV.push = .22 + Math.sin(t * .0005) * .04;
+    escV.pintar(clamp((tactil ? auto : mira.x * .9) + arr.ox, -1.6, 1.6), clamp((tactil ? 0 : mira.y * .6) + arr.oy, -1, 1), t * .001);
+  }
+  lienzoV.addEventListener('pointerdown', e => { arr.on = true; arr.x = e.clientX; arr.y = e.clientY; lienzoV.setPointerCapture(e.pointerId); });
+  lienzoV.addEventListener('pointermove', e => { if (!arr.on) return; arr.ox = clamp((e.clientX - arr.x) / innerWidth * -4, -1.4, 1.4); arr.oy = clamp((e.clientY - arr.y) / innerHeight * -2, -.8, .8); });
+  ['pointerup', 'pointercancel'].forEach(n => lienzoV.addEventListener(n, () => { arr.on = false; }));
+
+  async function ponerHab(i, foto = 0) {
+    actual = (i + HAB.length) % HAB.length; const h = HAB[actual];
+    $('#visorNum').textContent = h.num; $('#visorNombre').textContent = 'Habitación ' + h.nombre;
+    $('#visorCap').textContent = h.cap; $('#visorDesc').textContent = h.desc;
+    $('#visorInc').innerHTML = h.inc.map(x => `<li>${x}</li>`).join('');
+    const fotos = $('#visorFotos'); fotos.innerHTML = '';
+    for (let k = 0; k < h.fotos; k++) {
+      const b = document.createElement('button'); b.type = 'button';
+      b.setAttribute('aria-pressed', k === foto); b.setAttribute('aria-label', `Foto ${k + 1}`);
+      b.innerHTML = `<img src="${fotoHab(h, k)}" alt="" width="1080" height="720">`;
+      b.addEventListener('click', () => verFoto(k));
+      fotos.appendChild(b);
+    }
+    if (G && !reducir) gsap.fromTo('.visor-info > *', { y: 24, opacity: 0 }, { y: 0, opacity: 1, stagger: .05, duration: .7, ease: 'power3.out' });
+    await verFoto(foto);
+  }
+  async function verFoto(k) {
+    const h = HAB[actual];
+    $$('#visorFotos button').forEach((b, j) => b.setAttribute('aria-pressed', j === k));
+    if (!escV) return;
+    const nueva = fotoHab(h, k), prof = P(`hab-${h.id}-${k + 1}`);
+    if (G && !reducir && capaV) await gsap.to(capaV, { oscuro: 1, duration: .25 });
+    if (!capaV) capaV = await escV.capa({ foto: nueva, prof, centro: [.5, .5], fuerza: .07 });
+    else await escV.cambiar(capaV, nueva, prof);
+    if (G && !reducir) gsap.fromTo(capaV, { oscuro: 1 }, { oscuro: 0, duration: .6 }); else capaV.oscuro = 0;
+  }
+  async function abrirVisor(i, desde) {
+    origen = desde; visor.hidden = false; visorAbierto = true; lenis && lenis.stop(); document.body.style.overflow = 'hidden';
+    if (!escV) { try { escV = new Escena3D(lienzoV); } catch { visor.classList.add('sin-gl'); } }
+    if (G && !reducir && desde) {
+      const r = $('.marco-foto', desde).getBoundingClientRect();
+      gsap.fromTo(visor, { clipPath: `inset(${r.top}px ${innerWidth - r.right}px ${innerHeight - r.bottom}px ${r.left}px round 2px)` }, { clipPath: 'inset(0px 0px 0px 0px round 0px)', duration: 1.1, ease: 'expo.inOut' });
+    }
+    await ponerHab(i);
+    $('#visorCerrar').focus();
+  }
+  function cerrarVisor() {
+    const fin = () => { visor.hidden = true; visorAbierto = false; lenis && lenis.start(); document.body.style.overflow = ''; origen && origen.focus(); };
+    if (G && !reducir && origen) {
+      const r = $('.marco-foto', origen).getBoundingClientRect();
+      gsap.to(visor, { clipPath: `inset(${r.top}px ${innerWidth - r.right}px ${innerHeight - r.bottom}px ${r.left}px round 2px)`, duration: .9, ease: 'expo.inOut', onComplete: fin });
+    } else fin();
+  }
+  $('#visorCerrar').addEventListener('click', cerrarVisor);
+  $('#visorAnt').addEventListener('click', () => ponerHab(actual - 1));
+  $('#visorSig').addEventListener('click', () => ponerHab(actual + 1));
+  addEventListener('keydown', e => {
+    if (!visorAbierto) return;
+    if (e.key === 'Escape') cerrarVisor();
+    if (e.key === 'ArrowRight') ponerHab(actual + 1);
+    if (e.key === 'ArrowLeft') ponerHab(actual - 1);
+  });
+
+  /* ---------- Textos: palabra a palabra y subidas ---------- */
+  function partirPalabras(el) {
+    const txt = el.textContent.trim().split(/\s+/);
+    el.innerHTML = txt.map(w => `<span class="palabra"><span>${w}</span></span>`).join(' ');
+    return $$('.palabra > span', el);
+  }
+  if (G && !reducir) {
+    $$('[data-palabras]').forEach(el => {
+      const ps = partirPalabras(el);
+      gsap.fromTo(ps, { yPercent: 110, rotate: 4 }, { yPercent: 0, rotate: 0, duration: 1.2, stagger: .06, ease: 'expo.out', scrollTrigger: { trigger: el, start: 'top 85%' } });
+    });
+    $$('[data-sube]').forEach(el => gsap.to(el, { opacity: 1, y: 0, duration: 1.1, ease: 'power3.out', scrollTrigger: { trigger: el, start: 'top 88%' } }));
+    gsap.fromTo('.puerta-hab', { y: 80, opacity: 0 }, { y: 0, opacity: 1, duration: 1.2, stagger: .08, ease: 'expo.out', clearProps: 'opacity,transform', scrollTrigger: { trigger: '#vitrina', start: 'top 85%' } });
+    // contadores
+    $$('[data-cuenta]').forEach(el => {
+      const fin = +el.dataset.cuenta, o = { v: 0 };
+      gsap.to(o, { v: fin, duration: 1.8, ease: 'power3.out', scrollTrigger: { trigger: el, start: 'top 90%' }, onUpdate: () => el.textContent = o.v.toFixed(1).replace('.', ',') });
+    });
+    // HISTORIA: fotos en capas a distinta profundidad; la cámara las atraviesa
+    // y al final el salón se abre hasta llenar la pantalla
+    const capasFotos = $$('.foto-capa[data-prof]');
+    gsap.set('.fc-final', { left: 0, top: 0, width: '100%', height: '100%', xPercent: 0, yPercent: 0, x: 0, y: 0, clipPath: 'inset(30% 33% 30% 33%)', opacity: 0 });
+    const th = gsap.timeline({ defaults: { ease: 'none' }, scrollTrigger: { trigger: '#historia', start: 'top top', end: '+=360%', pin: true, scrub: 1 } });
+    th.fromTo('.capas-fondo', { xPercent: 5 }, { xPercent: -55, duration: 1 }, 0);
+    capasFotos.forEach(f => {
+      const d = +f.dataset.prof;
+      th.fromTo(f, { y: () => innerHeight * .28 * d, scale: .9 + d * .02, rotateX: 8 }, { y: () => -innerHeight * .34 * d, scale: 1 + d * .05, rotateX: -6, duration: .85 }, 0);
+      th.fromTo($('img', f), { yPercent: -9 }, { yPercent: 9, duration: .85 }, 0);
+      th.to(f, { opacity: 0, duration: .12 }, .72);
+    });
+    const textoCapa = (sel, a, b) => {
+      th.fromTo(sel, { autoAlpha: 0, y: 40, filter: 'blur(10px)' }, { autoAlpha: 1, y: 0, filter: 'blur(0px)', duration: .07 }, a);
+      th.to(sel, { autoAlpha: 0, y: -30, filter: 'blur(8px)', duration: .06 }, b);
+    };
+    textoCapa('.ct-1', 0, .26); textoCapa('.ct-2', .3, .52); textoCapa('.ct-3', .56, .78);
+    th.to('.fc-final', { opacity: 1, duration: .06 }, .7)
+      .to('.fc-final', { clipPath: 'inset(0% 0% 0% 0%)', duration: .24 }, .74)
+      .fromTo('.fc-final img', { scale: 1.35 }, { scale: 1.05, duration: .3 }, .7)
+      .to('.capas-fondo', { opacity: 0, duration: .1 }, .78);
+    if (!tactil) {
+      const marcos = $$('.foto-capa[data-prof] .foto-marco').map(m => ({ m, d: +m.parentNode.dataset.prof, x: gsap.quickTo(m, 'x', { duration: .9, ease: 'power3' }), y: gsap.quickTo(m, 'y', { duration: .9, ease: 'power3' }), r: gsap.quickTo(m, 'rotateY', { duration: .9, ease: 'power3' }) }));
+      $('#capas').addEventListener('mousemove', e => {
+        const nx = e.clientX / innerWidth - .5, ny = e.clientY / innerHeight - .5;
+        marcos.forEach(o => { o.x(-nx * 40 * o.d); o.y(-ny * 30 * o.d); o.r(nx * 6 * o.d); });
+      });
+    }
+    // DESAYUNO: la cámara entra por el túnel de fotos hasta llenar la pantalla
+    const tt = gsap.timeline({ defaults: { ease: 'none' }, scrollTrigger: { trigger: '#desayuno', start: 'top top', end: '+=280%', pin: true, scrub: 1 } });
+    $$('.t-foto').forEach((f, i) => {
+      const r = f.getBoundingClientRect(), cx = r.left + r.width / 2 - innerWidth / 2, cy = r.top - $('#tunel').getBoundingClientRect().top + r.height / 2 - innerHeight / 2;
+      tt.fromTo(f, { x: 0, y: 0, scale: 1, rotate: (i % 2 ? 3 : -3) }, { x: cx * 1.6, y: cy * 1.6, scale: 2.6, rotate: 0, duration: .7 }, i * .025)
+        .to(f, { opacity: 0, duration: .15 }, .55 + i * .02)
+        .fromTo($('img', f), { scale: 1.2 }, { scale: 1, duration: .7 }, 0);
+    });
+    tt.fromTo('.tunel-titulo', { scale: .9, opacity: 1 }, { scale: 1.7, opacity: 0, duration: .35 }, 0)
+      .fromTo('.t-centro', { scale: 1 }, { scale: () => { const r = $('.t-centro').getBoundingClientRect(); return Math.max(innerWidth / r.width, innerHeight / r.height) * 1.04; }, borderRadius: 0, duration: .7 }, .05)
+      .fromTo('.t-centro img', { scale: 1.3 }, { scale: 1, duration: .75 }, 0)
+      .to('.tunel', { '--velo': 1, duration: .15 }, .72)
+      .fromTo('.tunel-texto', { autoAlpha: 0, y: 50 }, { autoAlpha: 1, y: 0, duration: .15 }, .76)
+      .to({}, { duration: .1 });
+    // Fotos que se mueven dentro de su marco al bajar
+    $$('.foto-viva img').forEach(img => gsap.fromTo(img, { yPercent: -7 }, { yPercent: 7, ease: 'none', scrollTrigger: { trigger: img.parentNode, start: 'top bottom', end: 'bottom top', scrub: true } }));
+    // pie: el nombre crece
+    gsap.fromTo('.pie-nombre', { yPercent: 40, scale: .9 }, { yPercent: 0, scale: 1, ease: 'none', scrollTrigger: { trigger: '.pie', start: 'top bottom', end: 'bottom bottom', scrub: true } });
+    // botones magnéticos
+    if (!tactil) $$('.boton-luz, .timbre, .reservar').forEach(b => {
+      b.addEventListener('mousemove', e => { const r = b.getBoundingClientRect(); gsap.to(b, { x: (e.clientX - r.left - r.width / 2) * .3, y: (e.clientY - r.top - r.height / 2) * .3, duration: .5, ease: 'power3.out' }); });
+      b.addEventListener('mouseleave', () => gsap.to(b, { x: 0, y: 0, duration: .8, ease: 'power3.out' }));
+    });
+  } else $$('[data-sube]').forEach(el => { el.style.opacity = 1; el.style.transform = 'none'; });
+
+  /* ---------- Carga: prepara las escenas 3D y abre el telón ---------- */
+  async function iniciar() {
+    const num = $('#cargaNum'), barra = $('#cargaBarra');
+    let hecho = 0; const total = 2 + escenas.length;
+    const paso = () => { hecho++; const v = Math.round(hecho / total * 100); num.textContent = v; barra.style.transform = `scaleX(${hecho / total})`; };
+    try {
+      escE = new Escena3D(lienzoE);
+      salon = await escE.capa({ foto: 'img/salon-1.jpg', prof: P('salon-1'), centro: [.78, .52], fuerza: .05 }); salon.alfa = 0; paso();
+      fachada = await escE.capa({ foto: 'img/fachada.jpg', prof: P('fachada'), centro: PUERTA, fuerza: .045, foco: FOCO });
+      escE.capas.reverse(); paso();
+    } catch { $('.escenario', entrada).classList.add('sin-gl'); paso(); paso(); }
+    await Promise.all(escenas.map(async s => {
+      try { s.esc = new Escena3D(s.lienzo); s.capa = await s.esc.capa({ foto: `img/${s.foto}.jpg`, prof: P(s.foto), centro: s.centro, fuerza: .05 }); }
+      catch { $('.escenario', s.sec).classList.add('sin-gl'); }
+      paso();
+    }));
+    requestAnimationFrame(bucle);
+    const carga = $('#carga');
+    if (G && !reducir) {
+      const tl = gsap.timeline();
+      tl.to('.carga-nombre span', { yPercent: -110, stagger: .06, duration: .7, ease: 'power3.in' }, '+=.2')
+        .to(carga, { clipPath: 'inset(0 0 100% 0)', duration: 1.1, ease: 'expo.inOut' }, '-=.2')
+        .set(carga, { display: 'none' })
+        .fromTo('.titulo-gigante .linea', { yPercent: 105 }, { yPercent: 0, duration: 1.4, stagger: .12, ease: 'expo.out' }, '-=.55')
+        .from('.sobre, .bajada', { opacity: 0, y: 20, duration: 1, stagger: .1 }, '-=1.1')
+        .from(timbre, { scale: 0, duration: .9, ease: 'back.out(1.6)' }, '-=.8');
+      gsap.from('.carga-nombre span', { yPercent: 110, stagger: .08, duration: .9, ease: 'expo.out' });
+    } else carga.style.display = 'none';
+    if (G) ScrollTrigger.refresh();
+  }
+  iniciar();
+})();

@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Les Monges Palace · Hotel boutique de 1912 en Alicante</title>
+<meta name="description" content="Hotel boutique en un palacete modernista de 1912, en el casco antiguo de Alicante, a cinco minutos de la playa del Postiguet. Ocho tipos de habitación, azotea The Terrace y desayuno buffet mediterráneo.">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-Du+OJKJSbdUgz5nrHeWWINvez6XKDDU/tyj/5c2uvwo=' https://cdnjs.cloudflare.com https://unpkg.com; style-src 'self' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; frame-src https://www.google.com https://maps.google.com; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="theme-color" content="#0d1310">
+<link rel="icon" href="img/azulejo-102.jpg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/cine.css">
+<script>document.documentElement.classList.add('js')</script>
+</head>
+<body>
+<div class="grano" aria-hidden="true"></div>
+<svg class="svg-filtros" width="0" height="0" aria-hidden="true"><filter id="pincel"><feTurbulence type="fractalNoise" baseFrequency=".04" numOctaves="2" seed="7"/><feDisplacementMap in="SourceGraphic" scale="4"/></filter></svg>
+
+<!-- Pantalla de carga -->
+<div class="carga" id="carga" aria-hidden="true">
+  <p class="carga-nombre"><span>Les</span> <span>Monges</span></p>
+  <p class="carga-cifra"><span id="cargaNum">0</span></p>
+  <div class="carga-barra"><i id="cargaBarra"></i></div>
+</div>
+
+<header class="cabecera" id="cabecera">
+  <a class="logo" href="#entrada" aria-label="Les Monges Palace, inicio">Les Monges <em>Palace</em></a>
+  <nav class="nav" aria-label="Principal">
+    <a href="#habitaciones">Habitaciones</a>
+    <a href="#historia">La casa</a>
+    <a href="#azotea">Azotea</a>
+    <a href="#alicante">Alicante</a>
+    <a href="#contacto">Contacto</a>
+  </nav>
+  <a class="reservar" href="https://book.hoteliga.com/lesmonges" target="_blank" rel="noopener"><span>Reservar</span></a>
+  <button class="nav-movil" id="navMovil" type="button" aria-expanded="false" aria-controls="cortina">Menú</button>
+</header>
+<div class="cortina" id="cortina" hidden>
+  <a href="#habitaciones">Habitaciones</a><a href="#historia">La casa</a><a href="#azotea">Azotea y desayuno</a><a href="#alicante">Alicante</a><a href="#contacto">Contacto</a>
+  <a class="cortina-reserva" href="https://book.hoteliga.com/lesmonges" target="_blank" rel="noopener">Reservar ahora</a>
+</div>
+
+<main>
+
+<!-- ============ 1. LA ENTRADA: la cámara entra por la puerta ============ -->
+<section class="entrada" id="entrada" aria-labelledby="titulo">
+  <div class="escenario">
+    <canvas class="lienzo" id="lienzoEntrada" aria-hidden="true"></canvas>
+    <img class="respaldo" src="img/fachada.jpg" alt="Fachada modernista del Hotel Les Monges Palace en la calle de Sant Agustí" width="1080" height="978">
+
+    <div class="capitulo cap-portada" data-de="0" data-a=".1">
+      <p class="sobre" data-letras>Alicante · Casco antiguo · 1912</p>
+      <h1 id="titulo" class="titulo-gigante"><span class="linea">Les Monges</span><span class="linea">Palace</span></h1>
+      <p class="bajada">Hotel boutique en un palacete modernista, a cinco minutos de la playa.</p>
+    </div>
+
+    <button class="timbre" id="timbre" type="button" aria-label="Entrar al hotel por la puerta">
+      <span class="timbre-aro"></span><span class="timbre-aro dos"></span>
+      <span class="timbre-texto">Entrar</span>
+    </button>
+
+    <div class="capitulo cap-izq" data-de=".16" data-a=".36">
+      <p class="cifra-capitulo">1912</p>
+      <p class="frase-capitulo">Piedra en el zócalo, forja en los balcones y la cerámica original en los aleros.</p>
+    </div>
+    <div class="capitulo cap-der" data-de=".6" data-a=".8">
+      <p class="cifra-capitulo">4 → 28</p>
+      <p class="frase-capitulo">Empezó como la pensión de las monjas, con cuatro habitaciones. Hoy son veintiocho.</p>
+    </div>
+    <div class="capitulo cap-final" data-de=".86" data-a="1.01">
+      <p class="titulo-medio">Bienvenido a casa</p>
+      <a class="boton-luz" href="#habitaciones">Elige tu habitación</a>
+    </div>
+
+    <div class="pista" id="pista" aria-hidden="true"><span>Desliza para entrar</span><i></i></div>
+    <div class="regla" aria-hidden="true"><i id="reglaBarra"></i></div>
+  </div>
+</section>
+
+<!-- ============ 2. HABITACIONES: escaparate y vista 3D ============ -->
+<section class="habitaciones" id="habitaciones" aria-labelledby="t-hab">
+  <div class="hab-cabeza">
+    <h2 id="t-hab" class="titulo-seccion" data-palabras>Ocho puertas, ocho habitaciones</h2>
+    <p class="hab-texto" data-sube>Cada puerta lleva su azulejo con dos monjas y su número. Elige una y entra: verás la habitación en 3D antes de reservar.</p>
+  </div>
+  <div class="vitrina" id="vitrina" role="list"></div>
+  <p class="hab-nota" data-sube>En todas: baño privado, aire acondicionado, televisor LED, wifi gratis, caja fuerte y secador. Cuna bajo petición. El precio depende de las fechas y se ve al reservar.</p>
+</section>
+
+<!-- Vista 3D de una habitación -->
+<div class="visor" id="visor" role="dialog" aria-modal="true" aria-labelledby="visorNombre" hidden>
+  <canvas class="lienzo" id="lienzoVisor" aria-hidden="true"></canvas>
+  <div class="visor-info">
+    <p class="visor-num" id="visorNum">301</p>
+    <h3 class="visor-nombre" id="visorNombre">Habitación</h3>
+    <p class="visor-cap" id="visorCap"></p>
+    <p class="visor-desc" id="visorDesc"></p>
+    <ul class="visor-inc" id="visorInc"></ul>
+    <div class="visor-fotos" id="visorFotos"></div>
+    <a class="boton-luz" href="https://book.hoteliga.com/lesmonges" target="_blank" rel="noopener">Reservar esta habitación</a>
+  </div>
+  <p class="visor-ayuda" aria-hidden="true">Mueve el ratón o arrastra para mirar dentro</p>
+  <button class="visor-cerrar" id="visorCerrar" type="button">Cerrar</button>
+  <div class="visor-pasos">
+    <button type="button" id="visorAnt" aria-label="Habitación anterior">←</button>
+    <button type="button" id="visorSig" aria-label="Habitación siguiente">→</button>
+  </div>
+</div>
+
+<!-- ============ 3. LA CASA: historia en horizontal ============ -->
+<section class="historia" id="historia" aria-labelledby="t-historia">
+  <div class="capas" id="capas">
+    <p class="capas-fondo" aria-hidden="true">Les Monges · 1912 · Les Monges · 1912</p>
+
+    <figure class="foto-capa fc-1" data-prof="1"><span class="foto-marco"><img src="img/fachada-lateral.jpg" width="1080" height="1080" alt="Fachada lateral del hotel con sus balcones de forja" loading="lazy"><span class="pincel"></span></span></figure>
+    <figure class="foto-capa fc-2" data-prof="2.2"><span class="foto-marco"><img src="img/fachada-balcones.jpg" width="1080" height="1080" alt="Balcones de forja y alero de cerámica original" loading="lazy"><span class="pincel"></span></span></figure>
+    <figure class="foto-capa fc-3" data-prof="3.4"><span class="foto-marco"><img src="img/azulejo-102.jpg" width="1080" height="1080" alt="Azulejo azul con dos monjas y el número 102" loading="lazy"><span class="pincel"></span></span></figure>
+    <figure class="foto-capa fc-4" data-prof="1.6"><span class="foto-marco"><img src="img/hab-junior-2.jpg" width="1080" height="720" alt="Ducha con azulejo de flores y bañera exenta bajo las vigas" loading="lazy"><span class="pincel"></span></span></figure>
+    <figure class="foto-capa fc-final"><span class="foto-marco"><img src="img/hab-sup-1.jpg" width="1080" height="720" alt="Habitación de la última planta bajo las vigas de madera" loading="lazy"><span class="pincel"></span></span></figure>
+
+    <div class="capas-texto ct-1">
+      <h2 id="t-historia" class="titulo-seccion">La casa de las monjas</h2>
+      <p>Un edificio de 1912 a espaldas del Ayuntamiento, en una calle peatonal del casco antiguo.</p>
+    </div>
+    <div class="capas-texto ct-2">
+      <p class="numero-grande">RACHA</p>
+      <p>Fue el primer edificio en el que se fijaron los técnicos municipales para empezar el Plan RACHA, la rehabilitación del casco antiguo de Alicante.</p>
+    </div>
+    <div class="capas-texto ct-3">
+      <p class="numero-grande">4</p>
+      <p>Empezó siendo la pensión «Les Monges», con cuatro habitaciones en un piso. Planta a planta, la familia la convirtió en hotel boutique, guardando la piedra, la forja y la cerámica original.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 4. AZOTEA ============ -->
+<section class="escena-foto" id="azotea" data-foto="terraza-1" data-centro=".55,.55" aria-labelledby="t-azotea">
+  <div class="escenario">
+    <canvas class="lienzo" aria-hidden="true"></canvas>
+    <img class="respaldo" src="img/terraza-1.jpg" alt="Azotea The Terrace con toldo y mesas de madera" width="1080" height="720" loading="lazy">
+    <div class="capitulo cap-izq" data-de="0" data-a=".55">
+      <h2 id="t-azotea" class="titulo-medio">The Terrace</h2>
+      <p class="frase-capitulo">La azotea de la casa: toldo, mesas de madera y el sol de Alicante casi todo el año.</p>
+    </div>
+    <div class="capitulo cap-der" data-de=".45" data-a="1.01">
+      <ul class="lista-luz">
+        <li>Para tomar algo al caer la tarde</li>
+        <li>Cumpleaños y celebraciones</li>
+        <li>Puedes decorarla y traer tu música</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 5. DESAYUNO: pila de fotos ============ -->
+<section class="desayuno" id="desayuno" aria-labelledby="t-desayuno">
+  <div class="tunel" id="tunel">
+    <p class="tunel-titulo" aria-hidden="true">Buenos días</p>
+    <figure class="t-foto t1"><img src="img/desayuno-1.jpg" width="1080" height="720" alt="" loading="lazy"></figure>
+    <figure class="t-foto t2"><img src="img/desayuno-3.jpg" width="1080" height="720" alt="" loading="lazy"></figure>
+    <figure class="t-foto t3"><img src="img/desayuno-5.jpg" width="1080" height="720" alt="" loading="lazy"></figure>
+    <figure class="t-foto t4"><img src="img/desayuno-7.jpg" width="1080" height="720" alt="" loading="lazy"></figure>
+    <figure class="t-foto t5"><img src="img/desayuno-9.jpg" width="1080" height="720" alt="" loading="lazy"></figure>
+    <figure class="t-foto t6"><img src="img/desayuno-10.jpg" width="1080" height="720" alt="" loading="lazy"></figure>
+    <figure class="t-centro"><img src="img/desayuno-2.jpg" width="1080" height="720" alt="Bizcochos y bollería en el buffet del desayuno" loading="lazy"></figure>
+    <div class="tunel-texto">
+      <h2 id="t-desayuno" class="titulo-medio">Desayuno buffet mediterráneo</h2>
+      <p>Bollería y bizcochos, embutidos y quesos, fruta fresca, zumos y platos calientes, servidos en el salón de piedra.</p>
+      <ul class="servicios">
+        <li>Wifi gratis</li><li>Parking</li><li>Bicicletas de alquiler</li><li>Tour de tapas</li><li>Tour histórico</li><li>Información turística</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 6. ALICANTE ============ -->
+<section class="escena-foto" id="alicante" data-foto="castillo" data-centro=".5,.4" aria-labelledby="t-alicante">
+  <div class="escenario">
+    <canvas class="lienzo" aria-hidden="true"></canvas>
+    <img class="respaldo" src="img/castillo.jpg" alt="El castillo de Santa Bárbara sobre el casco antiguo" width="1080" height="720" loading="lazy">
+    <div class="capitulo cap-izq" data-de="0" data-a=".5">
+      <h2 id="t-alicante" class="titulo-medio">Alicante a pie</h2>
+      <p class="frase-capitulo">Desde la puerta del hotel, la ciudad entera queda a un paseo.</p>
+    </div>
+    <div class="capitulo cap-distancias" data-de=".38" data-a="1.01">
+      <dl>
+        <div><dt>5 min</dt><dd>Playa del Postiguet</dd></div>
+        <div><dt>6 min</dt><dd>Tranvía, parada Mercado</dd></div>
+        <div><dt>1 min</dt><dd>Ayuntamiento</dd></div>
+        <div><dt>a pie</dt><dd>Castillo de Santa Bárbara, Barrio de Santa Cruz, MACA y Mercado Central</dd></div>
+      </dl>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 7. OPINIONES ============ -->
+<section class="opiniones" aria-labelledby="t-op">
+  <h2 id="t-op" class="oculto">Opiniones de huéspedes</h2>
+  <blockquote><p data-palabras>«Celebramos un cumpleaños en su azotea. ¡Todo fue perfecto!»</p></blockquote>
+  <p class="quien" data-sube>Ana R., opinión de 5 estrellas en Google</p>
+  <ul class="notas" data-sube>
+    <li><b data-cuenta="4.3">4,3</b><span>Google<br>685 opiniones</span></li>
+    <li><b data-cuenta="4.2">4,2</b><span>Trip.com<br>116 opiniones</span></li>
+    <li><b data-cuenta="4.1">4,1</b><span>Tripadvisor<br>32 opiniones</span></li>
+  </ul>
+</section>
+
+<!-- ============ 8. CONTACTO ============ -->
+<section class="contacto" id="contacto" aria-labelledby="t-contacto">
+  <div class="contacto-datos">
+    <h2 id="t-contacto" class="titulo-seccion" data-palabras>Te esperamos en la puerta</h2>
+    <p data-sube>Calle de Sant Agustí, 4 · 03002 Alicante</p>
+    <dl data-sube>
+      <div><dt>Recepción</dt><dd><a href="tel:+34965215046">965 21 50 46</a></dd></div>
+      <div><dt>Móvil</dt><dd><a href="tel:+34650496675">650 49 66 75</a></dd></div>
+      <div><dt>Entrada</dt><dd>desde las 15:00</dd></div>
+      <div><dt>Salida</dt><dd>hasta las 11:00</dd></div>
+    </dl>
+    <div class="contacto-botones" data-sube>
+      <a class="boton-luz" href="https://book.hoteliga.com/lesmonges" target="_blank" rel="noopener">Reservar ahora</a>
+      <a class="enlace-luz" href="https://www.google.com/maps/dir/?api=1&destination=Hotel+Les+Monges+Palace+Boutique+Alicante" target="_blank" rel="noopener">Cómo llegar</a>
+    </div>
+  </div>
+  <div class="contacto-mapa" data-sube>
+    <iframe title="Mapa del Hotel Les Monges Palace" src="https://www.google.com/maps?q=Hotel+Les+Monges+Palace+Boutique,+Calle+de+Sant+Agust%C3%AD+4,+Alicante&z=16&output=embed" loading="lazy" referrerpolicy="no-referrer-when-downgrade" sandbox="allow-scripts allow-same-origin allow-popups"></iframe>
+  </div>
+  <a class="correo" href="mailto:lesmongespalace@youandcohotels.com?subject=Consulta%20desde%20la%20web">lesmongespalace@youandcohotels.com</a>
+</section>
+</main>
+
+<footer class="pie">
+  <p class="pie-nombre" aria-hidden="true">Les Monges</p>
+  <div class="pie-fila">
+    <p>Hotel boutique en Alicante · desde 1912</p>
+    <p><a href="https://www.instagram.com/hotellesmonges" target="_blank" rel="noopener">Instagram</a> · <a href="https://www.facebook.com/HotelLesMongesAlicante" target="_blank" rel="noopener">Facebook</a> · <a href="https://hotellesmongespalace.com/politica-de-privacidad" target="_blank" rel="noopener">Privacidad</a></p>
+  </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" integrity="sha384-g4NTh/Iv5PPU4xPyhEWqPcwtNXOvdaDI8LLnyYfyNZOjKJeYQyjzQ9X5275eBjpt" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js" integrity="sha384-Z3REaz79l2IaAZqJsSABtTbhjgOUYyV3p90XNnAPCSHg3EMTz1fouunq9WZRtj3d" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/lenis@1.1.13/dist/lenis.min.js" integrity="sha384-B2WBjDzEjJpYvhmi2UyEn7rektqkf5suS6sNoyyrf0EBAwBHdkiXxIlU0V5Ru2ed" crossorigin="anonymous"></script>
+<script src="js/profundidad.js"></script>
+<script src="js/cine.js"></script>
+</body>
+</html>
