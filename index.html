@@ -35,11 +35,11 @@
     <a href="#alicante">Alicante</a>
     <a href="#contacto">Contacto</a>
   </nav>
-  <a class="reservar" href="https://book.hoteliga.com/lesmonges" target="_blank" rel="noopener"><span>Reservar</span></a>
-  <button class="nav-movil" id="navMovil" type="button" aria-expanded="false" aria-controls="cortina">Menú</button>
+  <div class="cab-botones"><a class="boton-menu" href="#menu">Menú</a><a class="reservar" href="https://book.hoteliga.com/lesmonges" target="_blank" rel="noopener"><span>Reservar</span></a></div>
+  <button class="nav-movil" id="navMovil" type="button" aria-expanded="false" aria-controls="cortina">Secciones</button>
 </header>
 <div class="cortina" id="cortina" hidden>
-  <a href="#habitaciones">Habitaciones</a><a href="#historia">La casa</a><a href="#azotea">Azotea y desayuno</a><a href="#alicante">Alicante</a><a href="#contacto">Contacto</a>
+  <a href="#habitaciones">Habitaciones</a><a href="#historia">La casa</a><a href="#azotea">Azotea y desayuno</a><a href="#menu">Menú</a><a href="#alicante">Alicante</a><a href="#contacto">Contacto</a>
   <a class="cortina-reserva" href="https://book.hoteliga.com/lesmonges" target="_blank" rel="noopener">Reservar ahora</a>
 </div>
 
@@ -174,12 +174,54 @@
     <div class="tunel-texto">
       <h2 id="t-desayuno" class="titulo-medio">Desayuno buffet mediterráneo</h2>
       <p>Bollería y bizcochos, embutidos y quesos, fruta fresca, zumos y platos calientes, servidos en el salón de piedra. <strong class="precio">11 € por persona</strong></p>
+      <a class="boton-luz" href="#menu">Ver el menú</a>
       <ul class="servicios">
         <li>Wifi gratis</li><li>Parking</li><li>Bicicletas de alquiler</li><li>Tour de tapas</li><li>Tour histórico</li><li>Información turística</li>
       </ul>
     </div>
   </div>
 </section>
+
+
+<!-- ============ MENÚ ============ -->
+<section class="carta" id="menu" aria-labelledby="t-menu">
+  <div class="carta-hoja">
+    <span class="pincel" aria-hidden="true"></span>
+    <div class="carta-cabeza">
+      <h2 id="t-menu" class="titulo-seccion">Menú</h2>
+      <p>Lo que encontrarás en nuestro desayuno buffet mediterráneo, servido cada mañana en el salón de piedra.</p>
+    </div>
+    <div class="carta-bloque">
+      <h3>Desayuno buffet mediterráneo <span class="carta-precio">11 € por persona</span></h3>
+      <ul class="carta-lista">
+        <li><span class="plato-nombre">Bizcochos de chocolate y de vainilla</span><span class="plato-precio">incluido</span><button class="ver-foto" type="button" data-foto="img/desayuno-2.jpg" data-nombre="Bizcochos de chocolate y de vainilla">Ver foto</button></li>
+        <li><span class="plato-nombre">Cruasanes</span><span class="plato-precio">incluido</span><button class="ver-foto" type="button" data-foto="img/desayuno-3.jpg" data-nombre="Cruasanes">Ver foto</button></li>
+        <li><span class="plato-nombre">Dónuts de chocolate y glaseados</span><span class="plato-precio">incluido</span><button class="ver-foto" type="button" data-foto="img/desayuno-4.jpg" data-nombre="Dónuts de chocolate y glaseados">Ver foto</button></li>
+        <li><span class="plato-nombre">Fruta fresca: manzanas y plátanos</span><span class="plato-precio">incluido</span><button class="ver-foto" type="button" data-foto="img/desayuno-5.jpg" data-nombre="Fruta fresca: manzanas y plátanos">Ver foto</button></li>
+        <li><span class="plato-nombre">Fruta cortada: sandía y piña</span><span class="plato-precio">incluido</span><button class="ver-foto" type="button" data-foto="img/desayuno-8.jpg" data-nombre="Fruta cortada: sandía y piña">Ver foto</button></li>
+        <li><span class="plato-nombre">Jamón serrano, embutidos y queso</span><span class="plato-precio">incluido</span><button class="ver-foto" type="button" data-foto="img/desayuno-7.jpg" data-nombre="Jamón serrano, embutidos y queso">Ver foto</button></li>
+        <li><span class="plato-nombre">Pan para tostar y tomate rallado</span><span class="plato-precio">incluido</span><button class="ver-foto" type="button" data-foto="img/desayuno-6.jpg" data-nombre="Pan para tostar y tomate rallado">Ver foto</button></li>
+        <li><span class="plato-nombre">Cereales y copos</span><span class="plato-precio">incluido</span><button class="ver-foto" type="button" data-foto="img/desayuno-9.jpg" data-nombre="Cereales y copos">Ver foto</button></li>
+        <li><span class="plato-nombre">Zumos</span><span class="plato-precio">incluido</span><button class="ver-foto" type="button" data-foto="img/desayuno-1.jpg" data-nombre="Zumos">Ver foto</button></li>
+        <li><span class="plato-nombre">Café, tostada y zumo en la mesa</span><span class="plato-precio">incluido</span><button class="ver-foto" type="button" data-foto="img/desayuno-10.jpg" data-nombre="Café, tostada y zumo en la mesa">Ver foto</button></li>
+      </ul>
+    </div>
+    <div class="carta-bloque">
+      <h3>Extras del hotel</h3>
+      <ul class="carta-lista">
+        <li><span class="plato-nombre">Pack romántico</span><span class="plato-precio">15 €</span></li>
+        <li><span class="plato-nombre">Free tour por Alicante</span><span class="plato-precio">gratis</span></li>
+      </ul>
+    </div>
+    <p class="carta-nota">Precios de la tienda online del hotel. Pregunta en recepción por la disponibilidad.</p>
+  </div>
+</section>
+
+<!-- Foto de un plato -->
+<div class="foto-plato" id="fotoPlato" role="dialog" aria-modal="true" aria-labelledby="fotoPlatoNombre" hidden>
+  <figure><img id="fotoPlatoImg" src="img/desayuno-2.jpg" width="1080" height="720" alt=""><figcaption id="fotoPlatoNombre"></figcaption></figure>
+  <button class="foto-plato-cerrar" id="fotoPlatoCerrar" type="button">Cerrar</button>
+</div>
 
 <!-- ============ 6. ALICANTE ============ -->
 <section class="escena-foto" id="alicante" data-foto="castillo" data-centro=".5,.4" aria-labelledby="t-alicante">

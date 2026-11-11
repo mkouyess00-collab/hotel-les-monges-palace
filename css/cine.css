@@ -312,3 +312,58 @@ button{font:inherit;color:inherit;cursor:pointer;background:none;border:0}
   .gal-flecha{width:46px;height:46px}
   .visor-botones .boton-luz,.boton-3d{min-height:48px;padding:0 18px}
 }
+
+/* ---------- fotos de habitación enteras, sin recortar ---------- */
+.visor{background:var(--noche)}
+.visor::after{display:none}
+.galeria{left:calc(min(440px,86vw) + var(--m) * 2);right:var(--m);top:84px;bottom:var(--m);background:none}
+.galeria img{object-fit:contain;object-position:center}
+.gal-ant{left:calc(min(440px,86vw) + var(--m) * 2 + 14px)}
+.gal-sig{right:calc(var(--m) + 14px)}
+.visor-pasos{top:22px;right:calc(var(--m) + 120px);transform:none;grid-auto-flow:column}
+@media (max-width:900px){
+  .galeria{left:0;right:0;top:72px;bottom:auto;height:42svh}
+  .gal-ant,.gal-sig{top:calc(72px + 21svh)}
+  .gal-ant{left:10px}.gal-sig{right:10px}
+  .visor-info{top:calc(42svh + 88px);bottom:0;transform:none;overflow-y:auto;padding-bottom:24px;width:auto;right:var(--m)}
+  .visor-desc{display:block}
+  .visor-pasos{left:var(--m);right:auto}
+}
+
+/* ---------- menú: una carta de esmalte con el borde de azulejo ---------- */
+.carta{padding:clamp(110px,12vw,180px) var(--m);background:var(--noche)}
+.carta-hoja{position:relative;max-width:980px;margin:0 auto;background:var(--esmalte);color:var(--noche);padding:clamp(34px,5vw,80px);border-radius:3px;display:grid;gap:44px}
+.carta-hoja > .pincel{inset:clamp(10px,1.2vw,16px);border-width:3px}
+.carta-cabeza{display:grid;gap:14px;max-width:46ch}
+.carta-cabeza .titulo-seccion{color:var(--cobalto)}
+.carta-cabeza p{font-size:clamp(17px,1.3vw,20px);color:#3c3a33}
+.carta-bloque{display:grid;gap:18px}
+.carta-bloque h3{font:500 clamp(28px,2.4vw,38px)/1.05 var(--f-t);display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 18px}
+.carta-precio{font:600 italic clamp(24px,2vw,32px)/1 var(--f-t);color:var(--cobalto)}
+.carta-lista{display:grid;gap:4px}
+.carta-lista li{display:grid;grid-template-columns:1fr auto auto;align-items:center;gap:18px;padding:12px 0;font-size:17px;color:#24221d;border-bottom:1px solid rgba(38,70,143,.18)}
+.plato-precio{font:500 italic 22px/1 var(--f-t);color:var(--cobalto)}
+.ver-foto{min-height:40px;padding:0 16px;border-radius:999px;border:1.5px solid var(--cobalto);color:var(--cobalto);font-size:14px;font-weight:500;transition:background .25s,color .25s}
+.ver-foto:hover{background:var(--cobalto);color:var(--esmalte)}
+.carta-lista li:not(:has(.ver-foto)){grid-template-columns:1fr auto}
+.carta-nota{font-size:14px;color:#5b584f}
+.foto-plato{position:fixed;inset:0;z-index:130;background:rgba(8,11,9,.9);display:grid;place-items:center;padding:70px var(--m) var(--m)}
+.foto-plato[hidden]{display:none}
+.foto-plato figure{margin:0;display:grid;gap:14px;justify-items:center}
+.foto-plato img{max-width:min(1080px,92vw);max-height:76svh;width:auto;height:auto;object-fit:contain;border-radius:3px}
+.foto-plato figcaption{font:400 clamp(24px,2.2vw,34px)/1.1 var(--f-t);text-align:center}
+.foto-plato-cerrar{position:absolute;top:22px;right:var(--m);min-height:44px;padding:0 20px;border-radius:999px;border:1px solid rgba(238,231,216,.35);font-size:14px}
+.foto-plato-cerrar:hover{background:var(--hueso);color:var(--noche)}
+.cab-botones{justify-self:end;display:flex;gap:10px;align-items:center}
+.boton-menu{display:inline-flex;align-items:center;min-height:42px;padding:0 20px;border-radius:999px;background:var(--laton);color:var(--noche);font-size:14px;font-weight:500;text-decoration:none;transition:background .3s}
+.boton-menu:hover{background:var(--laton-2)}
+.tunel-texto .boton-luz{justify-self:start}
+@media (max-width:900px){
+  .cabecera{grid-template-columns:1fr auto auto;gap:8px}
+  .cab-botones{order:2}
+  .cab-botones .reservar{display:none}
+  .boton-menu{min-height:40px;padding:0 16px}
+  .carta-lista li{grid-template-columns:1fr auto;gap:8px 12px}
+  .carta-lista .plato-precio{grid-column:2;grid-row:1}
+  .carta-lista .ver-foto{grid-column:1 / -1;justify-self:start;min-height:36px}
+}

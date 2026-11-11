@@ -38,9 +38,9 @@ if (window.top !== window.self) window.top.location = window.self.location;
   const alScroll = y => { cab.classList.toggle('esconde', y > ultimaY && y > 200 && $('#cortina').hidden); ultimaY = y; };
   lenis ? lenis.on('scroll', ({ scroll }) => alScroll(scroll)) : addEventListener('scroll', () => alScroll(scrollY), { passive: true });
   const navBtn = $('#navMovil'), cortina = $('#cortina');
-  function cerrarCortina() { cortina.hidden = true; navBtn.setAttribute('aria-expanded', 'false'); navBtn.textContent = 'Menú'; }
+  function cerrarCortina() { cortina.hidden = true; navBtn.setAttribute('aria-expanded', 'false'); navBtn.textContent = 'Secciones'; }
   navBtn.addEventListener('click', () => {
-    const abre = cortina.hidden; cortina.hidden = !abre; navBtn.setAttribute('aria-expanded', abre); navBtn.textContent = abre ? 'Cerrar' : 'Menú';
+    const abre = cortina.hidden; cortina.hidden = !abre; navBtn.setAttribute('aria-expanded', abre); navBtn.textContent = abre ? 'Cerrar' : 'Secciones';
     if (abre && G) gsap.from('#cortina a', { yPercent: 60, opacity: 0, stagger: .05, duration: .7, ease: 'power3.out' });
   });
 
@@ -165,7 +165,7 @@ if (window.top !== window.self) window.top.location = window.self.location;
     const a = $('#galFoto'), b = $('#galFoto2'), src = fotoHab(h, fotoAct);
     $$('#visorFotos button').forEach((x, j) => x.setAttribute('aria-pressed', j === fotoAct));
     a.alt = `Habitación ${h.nombre}, foto ${fotoAct + 1} de ${h.fotos}`;
-    if (G && !reducir) { b.src = a.src; gsap.set(b, { opacity: 1 }); a.src = src; gsap.fromTo(a, { scale: 1.06 }, { scale: 1, duration: 1.2, ease: 'power3.out' }); gsap.to(b, { opacity: 0, duration: .6 }); }
+    if (G && !reducir) { b.src = a.src; gsap.set(b, { opacity: 1 }); a.src = src; gsap.to(b, { opacity: 0, duration: .5 }); }
     else a.src = src;
   }
   function ponerHab(i) {
@@ -220,6 +220,19 @@ if (window.top !== window.self) window.top.location = window.self.location;
     if (e.key === 'ArrowRight') ponerFoto(fotoAct + 1);
     if (e.key === 'ArrowLeft') ponerFoto(fotoAct - 1);
   });
+
+
+  /* ---------- Menú: ver la foto de cada plato ---------- */
+  const fp = $('#fotoPlato'); let fpOrigen = null;
+  $$('.ver-foto').forEach(b => b.addEventListener('click', () => {
+    fpOrigen = b; $('#fotoPlatoImg').src = b.dataset.foto; $('#fotoPlatoImg').alt = b.dataset.nombre; $('#fotoPlatoNombre').textContent = b.dataset.nombre;
+    fp.hidden = false; lenis && lenis.stop(); document.body.style.overflow = 'hidden'; $('#fotoPlatoCerrar').focus();
+    if (G && !reducir) gsap.fromTo('#fotoPlato figure', { scale: .92, opacity: 0 }, { scale: 1, opacity: 1, duration: .6, ease: 'expo.out' });
+  }));
+  const cerrarPlato = () => { fp.hidden = true; lenis && lenis.start(); document.body.style.overflow = ''; fpOrigen && fpOrigen.focus(); };
+  $('#fotoPlatoCerrar').addEventListener('click', cerrarPlato);
+  fp.addEventListener('click', e => { if (e.target === fp) cerrarPlato(); });
+  addEventListener('keydown', e => { if (e.key === 'Escape' && !fp.hidden) cerrarPlato(); });
 
   /* ---------- Textos: palabra a palabra y subidas ---------- */
   function partirPalabras(el) {
