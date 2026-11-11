@@ -52,7 +52,7 @@ if (window.top !== window.self) window.top.location = window.self.location;
       const op = clamp(o);
       c.style.opacity = op; c.style.visibility = op > 0 ? 'visible' : 'hidden';
       c.style.transform = `translateY(${(1 - op) * 30}px)`;
-      c.style.filter = op < 1 ? `blur(${(1 - op) * 8}px)` : 'none';
+      c.style.filter = op < .6 ? `blur(${(.6 - op) * 10}px)` : 'none';
     });
   }
 
@@ -78,9 +78,9 @@ if (window.top !== window.self) window.top.location = window.self.location;
       fachada.luz = suave(tramo(p, .28, .5)) * .95;
       fachada.alfa = 1 - suave(tramo(p, .45, .54));
       salon.alfa = suave(tramo(p, .45, .54));
-      salon.push = .1 + entraSale(tramo(p, .45, 1)) * 1.35;
+      salon.push = .04 + entraSale(tramo(p, .45, 1)) * .22;
       salon.luz = (1 - suave(tramo(p, .47, .66))) * .8;
-      salon.oscuro = suave(tramo(p, .9, 1)) * .55;
+      salon.oscuro = suave(tramo(p, .78, .92)) * .45;
       const sx = tactil ? Math.sin(t * .0004) * .6 : mira.x, sy = tactil ? Math.cos(t * .0003) * .3 : mira.y;
       escE.pintar(sx, sy, t * .001);
     }
@@ -114,7 +114,7 @@ if (window.top !== window.self) window.top.location = window.self.location;
       if (!s.visible) return;
       s.p = progresoDe(s.sec);
       if (s.esc && s.capa) {
-        s.capa.push = .05 + entraSale(s.p) * 1.1;
+        s.capa.push = .03 + entraSale(s.p) * .3;
         s.capa.oscuro = .1 + suave(tramo(s.p, .55, 1)) * .25;
         s.esc.pintar(tactil ? Math.sin(t * .0004) * .6 : mira.x, tactil ? 0 : mira.y, t * .001);
       }

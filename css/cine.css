@@ -90,9 +90,10 @@ button{font:inherit;color:inherit;cursor:pointer;background:none;border:0}
 .bajada{max-width:30ch;font-size:clamp(17px,1.4vw,21px);margin-top:28px}
 .cap-izq{left:var(--m);bottom:clamp(60px,14vh,140px);max-width:min(560px,80vw)}
 .cap-der{right:var(--m);bottom:clamp(60px,14vh,140px);max-width:min(520px,80vw);text-align:right}
-.cap-final{inset:0;display:grid;place-items:center;align-content:center;gap:34px;text-align:center}
-.cifra-capitulo{font:300 clamp(80px,13vw,230px)/.8 var(--f-t);color:var(--laton-2);letter-spacing:-.04em}
-.frase-capitulo{font:300 clamp(22px,2.1vw,34px)/1.25 var(--f-t);margin-top:18px}
+.cap-final{inset:0;display:grid;place-items:center;align-content:center;gap:34px;text-align:center;background:radial-gradient(60% 45% at 50% 50%,rgba(12,17,14,.72),rgba(12,17,14,0))} /* velo para leer */
+.cap-final .titulo-medio{font-weight:500;text-shadow:0 2px 30px rgba(0,0,0,.6)}
+.cifra-capitulo{font:400 clamp(80px,13vw,230px)/.8 var(--f-t);text-shadow:0 4px 40px rgba(0,0,0,.5);color:var(--laton-2);letter-spacing:-.04em}
+.frase-capitulo{font:500 clamp(22px,2.1vw,34px)/1.25 var(--f-t);margin-top:18px;text-shadow:0 2px 24px rgba(0,0,0,.7)}
 .lista-luz{display:grid;gap:12px;font:300 clamp(22px,2vw,32px)/1.2 var(--f-t)}
 .timbre{position:absolute;z-index:3;width:110px;height:110px;margin:-55px 0 0 -55px;display:grid;place-items:center;border-radius:50%}
 .timbre-aro{position:absolute;inset:0;border-radius:50%;border:1px solid var(--laton-2);animation:onda 2.6s var(--suave) infinite}

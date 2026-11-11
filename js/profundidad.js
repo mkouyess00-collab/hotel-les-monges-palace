@@ -20,7 +20,7 @@
     vec2 s = mix(uCentro, cubrir(vec2(.5)), k);
     vec2 q = uv; float d = texture2D(uDep, uv).r;
     for (int i = 0; i < 4; i++) {
-      float z = 1. + uPush*(.25 + .9*d);
+      float z = 1. + uPush*(.82 + .18*d);
       q = uCentro + (uv - s)/z - uMirada*uFuerza*(d - .45);
       d = mix(d, texture2D(uDep, q).r, .7);
     }
